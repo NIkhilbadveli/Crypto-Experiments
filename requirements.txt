@@ -1,0 +1,8 @@
+python-binance
+numpy
+websocket-client
+pandas
+matplotlib
+keras
+tensorflow
+tqdm
