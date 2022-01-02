@@ -49,4 +49,4 @@ def main():
         print('Yayy! We found correct nonce.')
 
 
-main()
+# main()

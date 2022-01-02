@@ -23,13 +23,22 @@ import numpy as np
 # There's also short position
 from mine import try_mining
 
-df = pd.read_csv('test_data.csv')
 
-row = df.iloc[11]
-# print('Trying to mine... ' + str(index))
-try_mining(row['header'], row['bits'])
-print('Actual nonce is ' + str(row['nonce']))
-print('\n')
+def diff(a, b):
+    count = 0
+    for i in range(0, 32):
+        if ((a >> i) & 1) != ((b >> i) & 1):
+            count = count + 1
+
+
+df = pd.read_csv('test_data.csv')
+df = df[27:]
+for index, row in df.iterrows():
+    print('Trying to mine... ' + str(index))
+    gen_nonce = try_mining(row['header'], row['bits'])
+    print('Actual nonce is ' + str(row['nonce']))
+    print('Number of wrong bits:- ' + str(diff(gen_nonce, row['nonce'])))
+    print('\n')
 
 # arr = df['nonce_hex'].apply(lambda x: int(x, 16)).to_numpy()
 # arr = arr[:5000]

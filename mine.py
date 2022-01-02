@@ -42,7 +42,7 @@ def get_nonce(header):
     for hx in header:
         s += bin(int(hx, 16))[2:].zfill(4)
     x = np.fromiter((int(x) for x in list(s)), dtype=np.int32)
-    y_raw = load_model().predict(x.reshape(1, 608))
+    y_raw = loaded_model.predict(x.reshape(1, 608))
     y_pred = np.where(y_raw > threshold, 1, 0)
     y_pred = y_pred[0]
     # should return 32 bit string of the nonce
@@ -83,7 +83,7 @@ def try_mining(header, bits):
                 a = a ^ (1 << 31 - pos)
             calc_hash, less_than_target = check_hash_with_nonce(header, target, a)
             if less_than_target:
-                found = True
+                # found = True
                 print('Found nonce! Value is ' + str(a))
                 print('Hash is ' + calc_hash)
                 end = timer()
@@ -99,7 +99,7 @@ def try_mining(header, bits):
             # Can also check the mining logic here by sending this nonce to that function
             # Maybe we can improve this loop with binary search instead of going in sequence.
             # This is because the correct positions might be spread out randomly among the 32 positions
-    return found, a
+    return initial_nonce
 
 
 def test_mine():
@@ -131,4 +131,6 @@ def find_comb(x, y):
     comb = num / den
     return comb
 
-test_mine()
+
+loaded_model = load_model()
+# test_mine()
