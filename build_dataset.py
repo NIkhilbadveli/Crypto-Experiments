@@ -40,28 +40,58 @@ import numpy as np
 #
 # out_df.to_csv('nonce_data.csv')
 
-column_names = ['x', 'y']
+# column_names = ['x', 'y']
+# out_df = pd.DataFrame(columns=column_names)
+#
+# for filename in os.listdir('BlockData'):
+#     df = pd.read_csv('BlockData' + '/' + filename, sep='\t')
+#     print('Appending from... ' + filename)
+#     for index, row in df.iterrows():
+#         utc_time = time.strptime(row['time'], "%Y-%m-%d %H:%M:%S")
+#         epoch_time = timegm(utc_time)
+#         header_hash = convert_num(row['version']) + to_little(df.iloc[index - 1]['hash']) + to_little(
+#             row['merkle_root']) + convert_num(epoch_time) + convert_num(row['bits'])
+#         s = ''
+#         for hx in header_hash:
+#             s += bin(int(hx, 16))[2:].zfill(4)
+#         x = np.fromiter((int(x) for x in list(s)), dtype=np.int32)
+#         nonce_hex = convert_num(row['nonce'])
+#         s = ''
+#         for hx in nonce_hex:
+#             s += bin(int(hx, 16))[2:].zfill(4)
+#         y = np.fromiter((int(x) for x in list(s)), dtype=np.int32)
+#         if len(nonce_hex) == 8 and len(header_hash) == 152:
+#             out_df = out_df.append(pd.Series([x, y], index=column_names),
+#                                    ignore_index=True)
+# out_df = out_df[1:]
+# out_df.to_csv('input_data.csv')
+
+column_names = ['header', 'bits', 'nonce']
 out_df = pd.DataFrame(columns=column_names)
 
+found = False
 for filename in os.listdir('BlockData'):
+    if found:
+        break
     df = pd.read_csv('BlockData' + '/' + filename, sep='\t')
     print('Appending from... ' + filename)
+
     for index, row in df.iterrows():
-        utc_time = time.strptime(row['time'], "%Y-%m-%d %H:%M:%S")
-        epoch_time = timegm(utc_time)
-        header_hash = convert_num(row['version']) + to_little(df.iloc[index - 1]['hash']) + to_little(
-            row['merkle_root']) + convert_num(epoch_time) + convert_num(row['bits'])
-        s = ''
-        for hx in header_hash:
-            s += bin(int(hx, 16))[2:].zfill(4)
-        x = np.fromiter((int(x) for x in list(s)), dtype=np.int32)
-        nonce_hex = convert_num(row['nonce'])
-        s = ''
-        for hx in nonce_hex:
-            s += bin(int(hx, 16))[2:].zfill(4)
-        y = np.fromiter((int(x) for x in list(s)), dtype=np.int32)
-        if len(nonce_hex) == 8 and len(header_hash) == 152:
-            out_df = out_df.append(pd.Series([x, y], index=column_names),
-                                   ignore_index=True)
-out_df = out_df[1:]
-out_df.to_csv('input_data.csv')
+        if row['nonce'] == 64001806:
+            found = True
+            utc_time = time.strptime(row['time'], "%Y-%m-%d %H:%M:%S")
+            epoch_time = timegm(utc_time)
+            print(row['version'])
+            print(df.iloc[index - 1]['hash'])
+            print(row['merkle_root'])
+            print(epoch_time)
+            print(row['bits'])
+            break
+
+        # header_hash = convert_num(row['version']) + to_little(df.iloc[index - 1]['hash']) + to_little(
+        #     row['merkle_root']) + convert_num(epoch_time) + convert_num(row['bits'])
+        # if len(header_hash) == 152:
+        #     out_df = out_df.append(pd.Series([header_hash, int(row['bits']), int(row['nonce'])], index=column_names),
+        #                            ignore_index=True)
+# out_df = out_df[-100:]
+# out_df.to_csv('test_data.csv')

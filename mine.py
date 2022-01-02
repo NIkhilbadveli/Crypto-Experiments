@@ -55,12 +55,13 @@ def get_nonce(header):
 def try_mining(header, bits):
     # r is number of wrong bits
     s = get_nonce(header)
-    print('Predicted nonce from the model:- ' + s)
+
     if len(s) != 32:
         print('Length of the binary sequence must be 32 bits!')
         print('current length is ' + str(len(s)))
         return
     initial_nonce = int(s, 2)
+    print('Predicted nonce from the model:- ' + str(initial_nonce))
     r = [9, 8, 7, 6, 5]  # Until only 5 bits are wrong
 
     target_hex = int_to_hex_string(bits)
@@ -70,8 +71,9 @@ def try_mining(header, bits):
     for w_b in r:
         sum += find_comb(32, w_b)
     sum = int(sum)
-    print('Total possibilities:- ' + str(sum))
+    # print('Total possibilities:- ' + str(sum))
 
+    found = False
     start = timer()
     j = 0
     for w_b in r:
@@ -81,13 +83,15 @@ def try_mining(header, bits):
                 a = a ^ (1 << 31 - pos)
             calc_hash, less_than_target = check_hash_with_nonce(header, target, a)
             if less_than_target:
-                print('Found nonce!' + calc_hash)
+                found = True
+                print('Found nonce! Value is ' + str(a))
+                print('Hash is ' + calc_hash)
                 end = timer()
                 print(timedelta(seconds=end - start))
                 break
 
             j += 1
-            if j == sum:  # 1 million iterations
+            if j == sum:  # all possible iterations
                 print('Couldnt find nonce!')
                 end = timer()
                 print(timedelta(seconds=end - start))
@@ -95,6 +99,7 @@ def try_mining(header, bits):
             # Can also check the mining logic here by sending this nonce to that function
             # Maybe we can improve this loop with binary search instead of going in sequence.
             # This is because the correct positions might be spread out randomly among the 32 positions
+    return found, a
 
 
 def test_mine():
@@ -125,6 +130,5 @@ def find_comb(x, y):
     den = fact(y) * den
     comb = num / den
     return comb
-
 
 test_mine()

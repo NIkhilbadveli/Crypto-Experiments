@@ -26,16 +26,17 @@ def convert_num(num):
 
 
 def main():
-    version = 536870916
-    prev_hash = '00000000000000000008924b9804c972fe8ed96a65f802e53366e78e3b1eb316'
-    merkle = '85a5f3d34daeb8d7acb044a6b4c50451e0146de97bf2e24b735d6198e94800ea'
-    timestamp = 1640219129
-    bits = 386638367
-    nonce = 4134816545
+    version = 1073676288
+    prev_hash = '0000000000000000000bcbb69d6ebe4aa0825be5f48c2bfa62e4ca2f728b998a'
+    merkle = '54e1e701a075a315e6de9b298577a4fbfc837043b2b1b091319265f46c94808f'
+    timestamp = 1638349512
+    bits = 386701843
+    nonce = 64001806
 
     header_hex = convert_num(version) + to_little(prev_hash) + to_little(merkle) + convert_num(timestamp) + convert_num(
         bits) + convert_num(nonce)
-
+    # header_hex = '0000ff3f8a998b722fcae462fa2b8cf4e55b82a04abe6e9db6cb0b0000000000000000008f80946cf465923191b0b1b2437083fcfba47785299bdee615a375a001e7e154c83aa761139a0c17' + convert_num(
+    #     nonce)
     target_hex = int_to_hex_string(bits)
     target = int(target_hex[2:], 16) * 2 ** (8 * (int(target_hex[:2], 16) - 3))
     header_bin = unhexlify(header_hex)
@@ -47,3 +48,5 @@ def main():
     if int(big_endian_hash, 16) < target:
         print('Yayy! We found correct nonce.')
 
+
+main()

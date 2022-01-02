@@ -21,11 +21,18 @@ import numpy as np
 # Try to find out how long it took on average to get 1% increase in price
 # Maybe I need to open position in a different time or based on different logic
 # There's also short position
+from mine import try_mining
 
-df = pd.read_csv('output_data.csv')
+df = pd.read_csv('test_data.csv')
 
-arr = df['nonce_hex'].apply(lambda x: int(x, 16)).to_numpy()
-arr = arr[:5000]
-perc = (arr > 1000000000).sum() * 100 / np.size(arr)
-print('Around this much percentage of times nonce is greater than 1 billion: ' + str(perc))
+row = df.iloc[11]
+# print('Trying to mine... ' + str(index))
+try_mining(row['header'], row['bits'])
+print('Actual nonce is ' + str(row['nonce']))
+print('\n')
+
+# arr = df['nonce_hex'].apply(lambda x: int(x, 16)).to_numpy()
+# arr = arr[:5000]
+# perc = (arr > 1000000000).sum() * 100 / np.size(arr)
+# print('Around this much percentage of times nonce is greater than 1 billion: ' + str(perc))
 # So the figure is turning out to be around 70%
