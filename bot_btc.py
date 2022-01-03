@@ -1,19 +1,22 @@
 import pprint
+import time
+
 import websocket
 import json
 from binance.client import Client
 from binance.enums import *
 import config as config
 
-symbol = 'BTCUSDT'
-SOCKET = "wss://stream.binance.com:9443/ws/" + symbol.lower() + "@kline_1m"
-client = Client(config.API_KEY, config.API_SECRET)
-
-wallet = 100
-per_order = 2
-profit_pc = 0.01
-profit_ratio = (1 + profit_pc / 100)
-target_price = 0
+# symbol = 'BTCUSDT'
+# SOCKET = "wss://stream.binance.com:9443/ws/" + symbol.lower() + "@kline_1m"
+# client = Client(config.API_KEY, config.API_SECRET)
+#
+#
+# wallet = 100
+# per_order = 2
+# profit_pc = 0.01
+# profit_ratio = (1 + profit_pc / 100)
+# target_price = 0
 
 
 # This is the code for placing first order
@@ -27,23 +30,27 @@ target_price = 0
 # print(res)
 # print(client.get_symbol_ticker(symbol='BTCUSDT')['price'])
 
-def buy_crypto():
-    global wallet, target_price
-    buy_price = float(client.get_symbol_ticker(symbol=symbol)['price'])
-    target_price = profit_ratio * buy_price
-    print("Buying price is " + str(buy_price))
-    print("Target price is " + str(target_price))
-    print("Difference in dollars is " + str(target_price - buy_price))
-    wallet = wallet - per_order
-    print("Bought crypto... current wallet balance is $" + str(wallet))
 
+# def buy_crypto():
+#     global wallet, target_price
+#     buy_price = float(client.get_symbol_ticker(symbol=symbol)['price'])
+#     target_price = profit_ratio * buy_price
+#     print("Buying price is " + str(buy_price))
+#     print("Target price is " + str(target_price))
+#     print("Difference in dollars is " + str(target_price - buy_price))
+#     wallet = wallet - per_order
+#     print("Bought crypto... current wallet balance is $" + str(wallet))
+#
+#
+# def sell_crypto():
+#     global wallet
+#     wallet = wallet + per_order * profit_ratio
+#     print("Sold crypto... current wallet balance is $" + str(wallet))
+#     print("Yay! we got a profit of " + str(profit_pc) + "%")
+#     buy_crypto()
+from get_block_api import mine_live
 
-def sell_crypto():
-    global wallet
-    wallet = wallet + per_order * profit_ratio
-    print("Sold crypto... current wallet balance is $" + str(wallet))
-    print("Yay! we got a profit of " + str(profit_pc) + "%")
-    buy_crypto()
+ws_socket_url = "wss://ws.block.io"
 
 
 def on_open(w_s):
@@ -55,20 +62,28 @@ def on_close(w_s):
 
 
 def on_message(w_s, message):
-    global wallet
+    global prev_block_height
     json_message = json.loads(message)
-    close_price = float(json_message['k']['c'])
-    # print(close_price)
-    if close_price >= target_price:
-        sell_crypto()
+    print(json_message)
+    if json_message['type'] == 'new-blocks':
+        print(json_message['data'])
+        cur_block = json_message['data']['block_no']
+        if cur_block - prev_block_height == 1:
+            prev_block_height = cur_block
+            print('Sleeping for 5 secs... before we start mining for the next block')
+            time.sleep(5)
+            mine_live()
 
 
-def start_process(sym):
-    global symbol
-    symbol = sym
-    buy_crypto()
-    ws = websocket.WebSocketApp(SOCKET, on_open=on_open, on_close=on_close, on_message=on_message)
+def start_process():
+    ws = websocket.WebSocketApp(ws_socket_url, on_open=on_open, on_close=on_close, on_message=on_message)
     ws.run_forever()
+    data = {
+        "network": "BTC",
+        "type": "new-blocks"
+    }
+    ws.send(json.dumps(data))
 
 
-start_process(sym='BTCUSDT')
+prev_block_height = 717034
+start_process()

@@ -26,14 +26,14 @@ def load_model():
     return loaded_model
 
 
-def check_hash_with_nonce(header, target, nonce_int):
+def check_hash_with_nonce(header, nonce_int):
     header_hex = header + convert_num(nonce_int)
     header_bin = unhexlify(header_hex)
 
     calc_hash = sha256(sha256(header_bin).digest()).digest()
     big_endian_hash = hexlify(calc_hash[::-1]).decode("utf-8")
 
-    return big_endian_hash, int(big_endian_hash, 16) < target
+    return big_endian_hash
 
 
 def get_nonce(header):
@@ -67,12 +67,13 @@ def try_mining(header, bits):
     target_hex = int_to_hex_string(bits)
     target = int(target_hex[2:], 16) * 2 ** (8 * (int(target_hex[:2], 16) - 3))
 
-    sum = 0
+    all_possibilities = 0
     for w_b in r:
-        sum += find_comb(32, w_b)
-    sum = int(sum)
+        all_possibilities += find_comb(32, w_b)
+    all_possibilities = int(all_possibilities)
     # print('Total possibilities:- ' + str(sum))
 
+    header_with_nonce = ''
     found = False
     start = timer()
     j = 0
@@ -81,17 +82,18 @@ def try_mining(header, bits):
             a = initial_nonce
             for i, pos in enumerate(tup):
                 a = a ^ (1 << 31 - pos)
-            calc_hash, less_than_target = check_hash_with_nonce(header, target, a)
-            if less_than_target:
-                # found = True
+            calc_hash = check_hash_with_nonce(header, a)
+            if int(calc_hash, 16) < target:
+                found = True
                 print('Found nonce! Value is ' + str(a))
                 print('Hash is ' + calc_hash)
+                header_with_nonce = header + convert_num(a)
                 end = timer()
                 print(timedelta(seconds=end - start))
                 break
 
             j += 1
-            if j == sum:  # all possible iterations
+            if j == all_possibilities:  # all possible iterations
                 print('Couldnt find nonce!')
                 end = timer()
                 print(timedelta(seconds=end - start))
@@ -99,7 +101,8 @@ def try_mining(header, bits):
             # Can also check the mining logic here by sending this nonce to that function
             # Maybe we can improve this loop with binary search instead of going in sequence.
             # This is because the correct positions might be spread out randomly among the 32 positions
-    return initial_nonce
+
+    return found, initial_nonce, header_with_nonce
 
 
 def test_mine():

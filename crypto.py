@@ -35,6 +35,7 @@ def main():
 
     header_hex = convert_num(version) + to_little(prev_hash) + to_little(merkle) + convert_num(timestamp) + convert_num(
         bits) + convert_num(nonce)
+    print(header_hex)
     # header_hex = '0000ff3f8a998b722fcae462fa2b8cf4e55b82a04abe6e9db6cb0b0000000000000000008f80946cf465923191b0b1b2437083fcfba47785299bdee615a375a001e7e154c83aa761139a0c17' + convert_num(
     #     nonce)
     target_hex = int_to_hex_string(bits)
@@ -48,5 +49,5 @@ def main():
     if int(big_endian_hash, 16) < target:
         print('Yayy! We found correct nonce.')
 
-
 # main()
+# print(convert_num(80429395))
