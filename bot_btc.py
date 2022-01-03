@@ -68,7 +68,7 @@ def on_message(w_s, message):
     if json_message['type'] == 'new-blocks':
         print(json_message['data'])
         cur_block = json_message['data']['block_no']
-        if cur_block - prev_block_height == 1:
+        if cur_block > prev_block_height:
             prev_block_height = cur_block
             print('Sleeping for 5 secs... before we start mining for the next block')
             time.sleep(5)
