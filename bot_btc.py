@@ -77,15 +77,16 @@ def on_close(w_s):
 def on_message(w_s, message):
     global prev_block_height
     json_message = json.loads(message)
-    print(json_message)
+
     if json_message['type'] == 'new-blocks':
-        print(json_message['data'])
         cur_block = json_message['data']['block_no']
         if cur_block > prev_block_height:
             prev_block_height = cur_block
             print('Sleeping for 5 secs... before we start mining for the next block')
             time.sleep(5)
             mine_live()
+    else:
+        print(json_message)
 
 
 def start_process():
