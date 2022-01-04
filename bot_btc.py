@@ -1,3 +1,4 @@
+import _thread
 import pprint
 import time
 
@@ -55,6 +56,18 @@ ws_socket_url = "wss://ws.block.io"
 
 def on_open(w_s):
     print("Socket connected!")
+    data = {
+        "network": "BTC",
+        "type": "new-blocks"
+    }
+
+    def run(*args):
+        w_s.send(json.dumps(data))
+        # time.sleep(1)
+        # w_s.close()
+        # print("thread terminating...")
+
+    _thread.start_new_thread(run, ())
 
 
 def on_close(w_s):
@@ -78,12 +91,7 @@ def on_message(w_s, message):
 def start_process():
     ws = websocket.WebSocketApp(ws_socket_url, on_open=on_open, on_close=on_close, on_message=on_message)
     ws.run_forever()
-    data = {
-        "network": "BTC",
-        "type": "new-blocks"
-    }
-    ws.send(json.dumps(data))
 
 
-prev_block_height = 717034
+prev_block_height = 717096
 start_process()
